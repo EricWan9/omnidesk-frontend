@@ -23,3 +23,22 @@ export async function getMessages(
         `/workspace/conversations/${conversationId}/messages?pageSize=${pageSize}`
     );
 }
+
+export async function sendMessage(
+    conversationId: string,
+    content: string
+): Promise<Message> {
+
+    return apiFetch<Message>(
+        `/workspace/conversations/${conversationId}/messages`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                content,
+            }),
+        }
+    );
+}

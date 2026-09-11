@@ -4,7 +4,7 @@ import ConversationList
     from "../components/conversations/ConversationList";
 
 import ChatPanel from "../components/chat/ChatPanel";
-import { getConversations, getMessages } from "../api/conversationApi";
+import { getConversations, getMessages, sendMessage } from "../api/conversationApi";
 
 import {
     useAppDispatch,
@@ -14,10 +14,12 @@ import {
 import {
     setSelectedConversationId,
     setConversations,
-    setMessages
+    setMessages,
+    messageReceived
 } from "../store/conversations/conversationSlice";
 import { createConversationHubConnection } from "../realtime/conversationHub";
 import type { HubConnection } from "@microsoft/signalr";
+import type { Message } from "../types/message";
 
 function AgentWorkspacePage() {
 
@@ -48,7 +50,20 @@ function AgentWorkspacePage() {
     useEffect(() => {
 
         const connection = createConversationHubConnection();
+
         connectionRef.current = connection;
+
+        connection.on(
+            "MessageSent",
+            (message: Message) => {
+                console.log(
+                    "MessageSent received:",
+                    message
+                );
+
+                dispatch(messageReceived(message));
+            }
+        );
 
         async function startConnection() {
             try {
@@ -77,7 +92,7 @@ function AgentWorkspacePage() {
     }, []);
 
     useEffect(() => {
-        
+
 
         if (!isSignalRConnected || selectedConversationId === null) {
             return;
@@ -206,6 +221,19 @@ function AgentWorkspacePage() {
                 conversation.id === selectedConversationId
         );
 
+    async function handleSendMessage(
+        content: string
+    ): Promise<void> {
+        if (selectedConversationId === null) {
+            return;
+        }
+
+        await sendMessage(
+            selectedConversationId,
+            content
+        );
+    }
+
     return (
         <div>
             <h1>OmniDesk</h1>
@@ -233,9 +261,8 @@ function AgentWorkspacePage() {
             ) : (
                 <ChatPanel
                     conversation={selectedConversation}
-                    messages={messages} onSendMessage={function (content: string): void {
-                        throw new Error("Function not implemented.");
-                    }} />
+                    messages={messages}
+                    onSendMessage={handleSendMessage} />
             )}
         </div>
     );

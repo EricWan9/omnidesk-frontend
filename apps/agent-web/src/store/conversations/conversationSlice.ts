@@ -14,7 +14,7 @@ const initialState: ConversationState = {
     messages: [],
 };
 
-const conversationSlice = createSlice ({
+const conversationSlice = createSlice({
     name: 'conversations',
     initialState,
     reducers: {
@@ -32,15 +32,34 @@ const conversationSlice = createSlice ({
 
         setMessages(state, action: PayloadAction<Message[]>) {
             state.messages = action.payload;
-        }
+        },
+
+        messageReceived(state, action: PayloadAction<Message>) {
+            const message = action.payload;
+
+            if (state.selectedConversationId !== message.conversationId) {
+                return;
+            }
+
+            const alreadyExists = state.messages.some(
+                m => m.id === message.id
+            );
+
+            if (alreadyExists) {
+                return;
+            }
+
+            state.messages.push(message);
+        },
     }
 })
 
-export const { 
-    setSelectedConversationId, 
+export const {
+    setSelectedConversationId,
     clearSelectedConversation,
     setConversations,
-    setMessages
+    setMessages,
+    messageReceived
 } = conversationSlice.actions;
 
 
