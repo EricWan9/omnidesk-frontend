@@ -1,45 +1,133 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ConversationList
     from "../components/conversations/ConversationList";
 
-import type { Conversation }
-    from "../types/conversation";
 import ChatPanel from "../components/chat/ChatPanel";
-import type { Message } from "../types/message";
 import { getConversations, getMessages } from "../api/conversationApi";
+
+import {
+    useAppDispatch,
+    useAppSelector,
+} from "../store/hooks";
+
+import {
+    setSelectedConversationId,
+    setConversations,
+    setMessages
+} from "../store/conversations/conversationSlice";
+import { createConversationHubConnection } from "../realtime/conversationHub";
+import type { HubConnection } from "@microsoft/signalr";
 
 function AgentWorkspacePage() {
 
-    const [
-        conversations,
-        setConversations,
-    ] = useState<Conversation[]>([]);
+    const [isLoadingConversations, setIsLoadingConversations] = useState(false);
 
-    const [
-        messages,
-        setMessages,
-    ] = useState<Message[]>([]);
+    const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
-    const [
+    const [error, setError] = useState<string | null>(null);
+
+    const selectedConversationId = useAppSelector(
+        state => state.conversations.selectedConversationId
+    );
+
+    const conversations = useAppSelector(
+        state => state.conversations.conversations
+    );
+
+    const messages = useAppSelector(
+        state => state.conversations.messages
+    );
+
+    const [isSignalRConnected, setIsSignalRConnected] = useState(false);
+
+    const dispatch = useAppDispatch();
+
+    const connectionRef = useRef<HubConnection | null>(null);
+
+    useEffect(() => {
+
+        const connection = createConversationHubConnection();
+        connectionRef.current = connection;
+
+        async function startConnection() {
+            try {
+                await connection.start();
+
+                setIsSignalRConnected(true);
+
+                console.log(
+                    "SignalR connected."
+                );
+            }
+            catch (error) {
+                console.error(
+                    "Failed to connect to SignalR.",
+                    error
+                );
+            }
+        }
+
+        startConnection();
+
+        return () => {
+            connection.stop();
+        };
+
+    }, []);
+
+    useEffect(() => {
+        
+
+        if (!isSignalRConnected || selectedConversationId === null) {
+            return;
+        }
+
+        const connection = connectionRef.current;
+
+        if (connection === null) {
+            return;
+        }
+
+        const conversationId = selectedConversationId;
+
+        async function joinConversation() {
+            try {
+
+                if (connection === null) {
+                    return;
+                }
+
+                await connection.invoke(
+                    "SubscribeConversation",
+                    conversationId
+                );
+
+                console.log(
+                    `Joined conversation ${conversationId}`
+                );
+            }
+            catch (error) {
+                console.error(
+                    "Failed to join conversation.",
+                    error
+                );
+            }
+        }
+
+        joinConversation();
+
+        return () => {
+            void connection.invoke(
+                "UnsubscribeConversation",
+                conversationId
+            );
+        };
+
+    }, [
         selectedConversationId,
-        setSelectedConversationId,
-    ] = useState<string | null>(null);
-
-    const [
-        isLoadingConversations,
-        setIsLoadingConversations,
-    ] = useState(false);
-
-    const [
-        isLoadingMessages,
-        setIsLoadingMessages,
-    ] = useState(false);
-
-    const [
-        error,
-        setError,
-    ] = useState<string | null>(null);
+        isSignalRConnected
+    ]);
 
     useEffect(() => {
 
@@ -51,7 +139,7 @@ function AgentWorkspacePage() {
                 const data =
                     await getConversations();
 
-                setConversations(data);
+                dispatch(setConversations(data));
             }
             catch (error) {
                 if (error instanceof Error) {
@@ -70,12 +158,12 @@ function AgentWorkspacePage() {
 
         loadConversations();
 
-    }, []);
+    }, [dispatch]);
 
     useEffect(() => {
 
         if (selectedConversationId === null) {
-            setMessages([]);
+            dispatch(setMessages([]));
             return;
         }
 
@@ -91,7 +179,7 @@ function AgentWorkspacePage() {
                         conversationId
                     );
 
-                setMessages(data);
+                dispatch(setMessages(data));
             }
             catch (error) {
                 if (error instanceof Error) {
@@ -113,10 +201,10 @@ function AgentWorkspacePage() {
     }, [selectedConversationId]);
 
     const selectedConversation =
-    conversations.find(
-        (conversation) =>
-            conversation.id === selectedConversationId
-    );
+        conversations.find(
+            (conversation) =>
+                conversation.id === selectedConversationId
+        );
 
     return (
         <div>
@@ -134,9 +222,9 @@ function AgentWorkspacePage() {
                     selectedConversationId={
                         selectedConversationId
                     }
-                    onSelectConversation={
-                        setSelectedConversationId
-                    }
+                    onSelectConversation={(conversationId) => {
+                        dispatch(setSelectedConversationId(conversationId));
+                    }}
                 />
             )}
 

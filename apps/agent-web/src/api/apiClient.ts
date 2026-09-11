@@ -1,9 +1,10 @@
+import { getAccessToken } from "../auth/tokenStore";
+
 export async function apiFetch<T>(
     path: string,
     options: RequestInit = {}
 ): Promise<T> {
-    const token =
-        sessionStorage.getItem("accessToken");
+    const token = getAccessToken();
 
     const headers = new Headers(options.headers);
 

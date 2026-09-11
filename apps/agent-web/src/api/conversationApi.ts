@@ -10,7 +10,7 @@ export async function getConversations():
     Promise<Conversation[]> {
 
     return apiFetch<Conversation[]>(
-        "/conversations"
+        "/workspace/conversations"
     );
 }
 
@@ -20,6 +20,6 @@ export async function getMessages(
 ): Promise<Message[]> {
 
     return apiFetch<Message[]>(
-        `/conversations/${conversationId}/messages?pageSize=${pageSize}`
+        `/workspace/conversations/${conversationId}/messages?pageSize=${pageSize}`
     );
 }
