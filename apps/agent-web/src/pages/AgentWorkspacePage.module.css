@@ -194,3 +194,29 @@
         display: none;
     }
 }
+
+@media (max-width: 640px) {
+    .workspace {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: 100%;
+    }
+
+    .chat {
+        display: none;
+        height: 100%;
+    }
+
+    .workspace[data-chat-selected="true"]
+    .sidebar {
+        display: none;
+    }
+
+    .workspace[data-chat-selected="true"]
+    .chat {
+        display: block;
+    }
+}

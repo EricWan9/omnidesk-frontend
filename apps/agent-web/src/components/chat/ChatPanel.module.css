@@ -241,3 +241,55 @@
     color: #98a2b3;
     font-size: 14px;
 }
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mobileBackButton {
+    display: none;
+
+    width: 36px;
+    height: 36px;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    border: 1px solid #e4e7ec;
+    border-radius: 8px;
+
+    background: #ffffff;
+    color: #344054;
+
+    font-size: 20px;
+    line-height: 1;
+}
+
+@media (max-width: 640px) {
+    .mobileBackButton {
+        display: inline-flex;
+    }
+
+    .header {
+        padding: 12px 16px;
+    }
+
+    .messages {
+        padding: 16px;
+    }
+
+    .composer {
+        padding: 12px;
+    }
+
+    .messageCustomer,
+    .messageAgent {
+        max-width: 85%;
+    }
+}

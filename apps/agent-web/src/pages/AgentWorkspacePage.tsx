@@ -15,6 +15,7 @@ import {
 
 import {
     setSelectedConversationId,
+    clearSelectedConversation,
     setConversations,
     setMessages,
     messageReceived
@@ -250,7 +251,12 @@ function AgentWorkspacePage() {
                 </div>
             </header>
 
-            <main className={styles.workspace}>
+            <main
+                className={styles.workspace}
+                data-chat-selected={
+                    selectedConversationId !== null
+                }
+            >
                 <aside className={styles.sidebar}>
                     <div className={styles.sidebarHeader}>
                         <h2>Conversations</h2>
@@ -295,6 +301,11 @@ function AgentWorkspacePage() {
                             conversation={selectedConversation}
                             messages={messages}
                             onSendMessage={handleSendMessage}
+                            onBack={() =>
+                                dispatch(
+                                    clearSelectedConversation()
+                                )
+                            }
                         />
                     )}
                 </section>

@@ -15,14 +15,16 @@ import styles
 
 interface Props {
     conversation:
-        Conversation | undefined;
+    Conversation | undefined;
 
     messages:
-        Message[];
+    Message[];
 
     onSendMessage:
-        (content: string) =>
-            void | Promise<void>;
+    (content: string) =>
+        void | Promise<void>;
+
+    onBack?: () => void;
 }
 
 function formatMessageTime(
@@ -42,6 +44,7 @@ function ChatPanel({
     conversation,
     messages,
     onSendMessage,
+    onBack,
 }: Props) {
 
     const [
@@ -116,14 +119,27 @@ function ChatPanel({
     return (
         <div className={styles.panel}>
             <header className={styles.header}>
-                <div>
-                    <h2>
-                        {conversation.customerName}
-                    </h2>
+                <div className={styles.headerLeft}>
+                    <button
+                        className={
+                            styles.mobileBackButton
+                        }
+                        type="button"
+                        aria-label="Back to conversations"
+                        onClick={onBack}
+                    >
+                        ←
+                    </button>
 
-                    <p>
-                        {conversation.customerEmail}
-                    </p>
+                    <div>
+                        <h2>
+                            {conversation.customerName}
+                        </h2>
+
+                        <p>
+                            {conversation.customerEmail}
+                        </p>
+                    </div>
                 </div>
 
                 <div className={styles.status}>
