@@ -1,32 +1,145 @@
-import type { Conversation } from "../../types/conversation";
-import ConversationItem from "./ConversationItem";
+import type { Conversation }
+    from "../../types/conversation";
 
-interface ConversationListProps {
+import styles
+    from "./ConversationList.module.css";
+
+interface Props {
     conversations: Conversation[];
-    selectedConversationId: string | null;
-    onSelectConversation: (id: string) => void;
+
+    selectedConversationId:
+        string | null;
+
+    onSelectConversation:
+        (conversationId: string) => void;
+}
+
+function formatTime(
+    value: string | null | undefined
+): string {
+    if (!value) {
+        return "";
+    }
+
+    const date = new Date(value);
+
+    return date.toLocaleTimeString(
+        [],
+        {
+            hour: "2-digit",
+            minute: "2-digit",
+        }
+    );
+}
+
+function getInitials(
+    name: string
+): string {
+    const parts =
+        name.trim().split(/\s+/);
+
+    return parts
+        .slice(0, 2)
+        .map(part => part[0])
+        .join("")
+        .toUpperCase();
 }
 
 function ConversationList({
     conversations,
     selectedConversationId,
     onSelectConversation,
-}: ConversationListProps) {
-    return (
-        <div>
-            <h2>Conversations</h2>
+}: Props) {
 
-            {conversations.map((conversation) => (
-                <ConversationItem
-                    key={conversation.id}
-                    conversation={conversation}
-                    isSelected={
+    if (conversations.length === 0) {
+        return (
+            <div className={styles.empty}>
+                No conversations yet.
+            </div>
+        );
+    }
+
+    return (
+        <div className={styles.list}>
+            {conversations.map(
+                conversation => {
+
+                    const selected =
                         conversation.id ===
-                        selectedConversationId
-                    }
-                    onSelect={onSelectConversation}
-                />
-            ))}
+                        selectedConversationId;
+
+                    return (
+                        <button
+                            key={conversation.id}
+                            type="button"
+                            className={
+                                selected
+                                    ? styles.itemSelected
+                                    : styles.item
+                            }
+                            onClick={() =>
+                                onSelectConversation(
+                                    conversation.id
+                                )
+                            }
+                        >
+                            <div
+                                className={
+                                    styles.avatar
+                                }
+                            >
+                                {getInitials(
+                                    conversation.customerName
+                                )}
+                            </div>
+
+                            <div
+                                className={
+                                    styles.content
+                                }
+                            >
+                                <div
+                                    className={
+                                        styles.topRow
+                                    }
+                                >
+                                    <span
+                                        className={
+                                            styles.name
+                                        }
+                                    >
+                                        {
+                                            conversation.customerName
+                                        }
+                                    </span>
+
+                                    <span
+                                        className={
+                                            styles.time
+                                        }
+                                    >
+                                        {formatTime(
+                                            conversation.lastMessageAt ??
+                                            conversation.updatedAt
+                                        )}
+                                    </span>
+                                </div>
+
+                                <div
+                                    className={
+                                        styles.preview
+                                    }
+                                >
+                                    {
+                                        conversation.lastMessage ??
+                                        "No messages yet"
+                                    }
+                                </div>
+                            </div>
+                        </button>
+                    );
+                }
+            )}
         </div>
     );
 }

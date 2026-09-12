@@ -1,0 +1,196 @@
+.page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    background: #f5f7fa;
+    color: #172033;
+}
+
+.header {
+    height: 68px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 24px;
+
+    background: #ffffff;
+    border-bottom: 1px solid #e6eaf0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brandMark {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.brandName {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.brandDescription {
+    margin-top: 2px;
+
+    color: #98a2b3;
+    font-size: 12px;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.connectionStatus {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #667085;
+    font-size: 13px;
+}
+
+.connectionDotOnline,
+.connectionDotOffline {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+}
+
+.connectionDotOnline {
+    background: #22c55e;
+}
+
+.connectionDotOffline {
+    background: #f59e0b;
+}
+
+.agentBadge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 34px;
+
+    padding: 0 14px;
+
+    border-radius: 8px;
+
+    background: #f2f4f7;
+    color: #344054;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.workspace {
+    flex: 1;
+    min-height: 0;
+
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+}
+
+.sidebar {
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #ffffff;
+    border-right: 1px solid #e6eaf0;
+}
+
+.sidebarHeader {
+    min-height: 76px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 16px 20px;
+
+    border-bottom: 1px solid #eef1f5;
+}
+
+.sidebarHeader h2 {
+    margin: 0;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.sidebarHeader span {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #98a2b3;
+    font-size: 12px;
+}
+
+.sidebarContent {
+    flex: 1;
+    min-height: 0;
+
+    overflow-y: auto;
+}
+
+.chat {
+    min-width: 0;
+    min-height: 0;
+
+    background: #f8fafc;
+}
+
+.state {
+    padding: 24px;
+
+    color: #667085;
+    font-size: 14px;
+}
+
+.error {
+    margin: 12px;
+    padding: 10px 12px;
+
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+
+    background: #fef2f2;
+    color: #b42318;
+
+    font-size: 13px;
+}
+
+@media (max-width: 800px) {
+    .workspace {
+        grid-template-columns: 280px minmax(0, 1fr);
+    }
+
+    .connectionStatus {
+        display: none;
+    }
+}

@@ -5,8 +5,8 @@ export type MessageSenderType =
 export interface Message {
     id: string;
     conversationId: string;
-    senderType: number;
-    senderUserId: string | null;
+    senderType: MessageSenderType;
+    senderId: string | null;
     content: string;
     createdAt: string;
 }

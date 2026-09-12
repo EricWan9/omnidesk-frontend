@@ -1,3 +1,5 @@
+import styles from "./AgentWorkspacePage.module.css";
+
 import { useEffect, useRef, useState } from "react";
 
 import ConversationList
@@ -235,35 +237,68 @@ function AgentWorkspacePage() {
     }
 
     return (
-        <div>
-            <h1>OmniDesk</h1>
+        <div className={styles.page}>
+            <header className={styles.header}>
+                <div>
+                    <h1 className={styles.logo}>
+                        OmniDesk
+                    </h1>
+                </div>
 
-            {error && (
-                <p>{error}</p>
-            )}
+                <div className={styles.headerRight}>
+                    Agent Workspace
+                </div>
+            </header>
 
-            {isLoadingConversations ? (
-                <p>Loading conversations...</p>
-            ) : (
-                <ConversationList
-                    conversations={conversations}
-                    selectedConversationId={
-                        selectedConversationId
-                    }
-                    onSelectConversation={(conversationId) => {
-                        dispatch(setSelectedConversationId(conversationId));
-                    }}
-                />
-            )}
+            <main className={styles.workspace}>
+                <aside className={styles.sidebar}>
+                    <div className={styles.sidebarHeader}>
+                        <h2>Conversations</h2>
+                    </div>
 
-            {isLoadingMessages ? (
-                <p>Loading messages...</p>
-            ) : (
-                <ChatPanel
-                    conversation={selectedConversation}
-                    messages={messages}
-                    onSendMessage={handleSendMessage} />
-            )}
+                    {error && (
+                        <p className={styles.error}>
+                            {error}
+                        </p>
+                    )}
+
+                    {isLoadingConversations ? (
+                        <p className={styles.state}>
+                            Loading conversations...
+                        </p>
+                    ) : (
+                        <ConversationList
+                            conversations={conversations}
+                            selectedConversationId={
+                                selectedConversationId
+                            }
+                            onSelectConversation={
+                                (conversationId) => {
+                                    dispatch(
+                                        setSelectedConversationId(
+                                            conversationId
+                                        )
+                                    );
+                                }
+                            }
+                        />
+                    )}
+                </aside>
+
+                <section className={styles.chat}>
+                    {isLoadingMessages ? (
+                        <p className={styles.state}>
+                            Loading messages...
+                        </p>
+                    ) : (
+                        <ChatPanel
+                            conversation={selectedConversation}
+                            messages={messages}
+                            onSendMessage={handleSendMessage}
+                        />
+                    )}
+                </section>
+            </main>
         </div>
     );
 }
