@@ -48,3 +48,14 @@ export async function sendMessage(
         }
     );
 }
+
+export async function markConversationAsRead(
+    conversationId: string,
+): Promise<void> {
+    await apiFetch<void>(
+        `/workspace/conversations/${conversationId}/read`,
+        {
+            method: "POST",
+        },
+    );
+}

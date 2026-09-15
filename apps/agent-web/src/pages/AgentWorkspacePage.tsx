@@ -6,7 +6,7 @@ import ConversationList
     from "../components/conversations/ConversationList";
 
 import ChatPanel from "../components/chat/ChatPanel";
-import { getConversations, getMessages, sendMessage } from "../api/conversationApi";
+import { getConversations, getMessages, markConversationAsRead, sendMessage } from "../api/conversationApi";
 
 import {
     useAppDispatch,
@@ -18,11 +18,14 @@ import {
     clearSelectedConversation,
     setConversations,
     setMessages,
-    messageReceived
+    messageReceived,
+    markConversationRead,
+    conversationUpdated
 } from "../store/conversations/conversationSlice";
 import { createConversationHubConnection } from "../realtime/conversationHub";
 import type { HubConnection } from "@microsoft/signalr";
 import type { Message } from "../types/message";
+import type { ConversationUpdated } from "../types/conversation";
 
 function AgentWorkspacePage() {
 
@@ -35,6 +38,8 @@ function AgentWorkspacePage() {
     const selectedConversationId = useAppSelector(
         state => state.conversations.selectedConversationId
     );
+
+    const selectedConversationIdRef = useRef<string | null>(null);
 
     const conversations = useAppSelector(
         state => state.conversations.conversations
@@ -51,6 +56,10 @@ function AgentWorkspacePage() {
     const connectionRef = useRef<HubConnection | null>(null);
 
     useEffect(() => {
+        selectedConversationIdRef.current = selectedConversationId;
+    }, [selectedConversationId]);
+
+    useEffect(() => {
 
         const connection = createConversationHubConnection();
 
@@ -59,12 +68,14 @@ function AgentWorkspacePage() {
         connection.on(
             "MessageSent",
             (message: Message) => {
-                console.log(
-                    "MessageSent received:",
-                    message
-                );
-
                 dispatch(messageReceived(message));
+            }
+        );
+
+        connection.on(
+            "ConversationUpdated",
+            (update: ConversationUpdated) => {
+                dispatch(conversationUpdated(update));
             }
         );
 
@@ -177,6 +188,45 @@ function AgentWorkspacePage() {
         loadConversations();
 
     }, [dispatch]);
+
+    useEffect(() => {
+        if (!selectedConversationId) {
+            return;
+        }
+
+        async function loadConversation() {
+            try {
+                const messages =
+                    await getMessages(
+                        selectedConversationId!,
+                    );
+
+                dispatch(
+                    setMessages(messages),
+                );
+
+                await markConversationAsRead(
+                    selectedConversationId!,
+                );
+
+                dispatch(
+                    markConversationRead(
+                        selectedConversationId!,
+                    ),
+                );
+            } catch (error) {
+                console.error(
+                    "Failed to load conversation.",
+                    error,
+                );
+            }
+        }
+
+        void loadConversation();
+    }, [
+        selectedConversationId,
+        dispatch,
+    ]);
 
     useEffect(() => {
 

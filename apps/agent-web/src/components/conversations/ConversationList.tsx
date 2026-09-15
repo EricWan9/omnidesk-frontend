@@ -136,6 +136,15 @@ function ConversationList({
                                     }
                                 </div>
                             </div>
+
+                            {conversation.unreadCount > 0 && (
+                                <span className={styles.unreadBadge}>
+                                    {conversation.unreadCount > 99
+                                        ? "99+"
+                                        : conversation.unreadCount}
+                                </span>
+                            )}
+                            
                         </button>
                     );
                 }
