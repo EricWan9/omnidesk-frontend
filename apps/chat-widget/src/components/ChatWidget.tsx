@@ -22,9 +22,10 @@ import {
   saveWidgetSession,
 } from "../session/widgetSession";
 
-import type {
-  Message,
-  WidgetSession,
+import {
+    MessageSenderType,
+  type Message,
+  type WidgetSession,
 } from "../types/widget";
 
 import styles from "./ChatWidget.module.css";
@@ -107,17 +108,17 @@ function formatTime(
 function getSenderLabel(
   message: Message,
 ): string {
-  switch (message.senderType) {
-    case "Customer":
+  switch (message.messageSender.type) {
+    case MessageSenderType.Customer:
       return "You";
 
-    case "Agent":
+    case MessageSenderType.Agent:
       return "Support";
 
-    case "Ai":
+    case MessageSenderType.Ai:
       return "AI Assistant";
 
-    case "System":
+    case MessageSenderType.System:
       return "System";
 
     default:
@@ -291,7 +292,7 @@ export default function ChatWidget() {
 
         try {
           await connection.invoke(
-            "JoinConversation",
+            "SubscribeConversation",
             session.conversationId,
           );
 
@@ -328,7 +329,7 @@ export default function ChatWidget() {
         }
 
         await connection.invoke(
-          "JoinConversation",
+          "SubscribeConversation",
           session.conversationId,
         );
 
@@ -556,12 +557,12 @@ export default function ChatWidget() {
                 {messages.map(
                   message => {
                     const isCustomer =
-                      message.senderType ===
-                      "Customer";
+                      message.messageSender.type ===
+                      MessageSenderType.Customer;
 
                     const isSystem =
-                      message.senderType ===
-                      "System";
+                      message.messageSender.type ===
+                      MessageSenderType.System;
 
                     if (isSystem) {
                       return (

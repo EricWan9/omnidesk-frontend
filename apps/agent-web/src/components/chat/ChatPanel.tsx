@@ -7,7 +7,7 @@ import {
 import type { Conversation }
     from "../../types/conversation";
 
-import type { Message }
+import { MessageSenderType, type Message }
     from "../../types/message";
 
 import styles
@@ -133,11 +133,11 @@ function ChatPanel({
 
                     <div>
                         <h2>
-                            {conversation.customerName}
+                            {conversation.customerName || "Anonymous"}
                         </h2>
 
                         <p>
-                            {conversation.customerEmail}
+                            {conversation.customerEmail || "No email provided"}
                         </p>
                     </div>
                 </div>
@@ -157,11 +157,11 @@ function ChatPanel({
 
                         const senderType =
                             String(
-                                message.senderType
+                                message.messageSender.type
                             ).toLowerCase();
 
                         const isAgent =
-                            senderType === "agent";
+                            senderType === MessageSenderType.Agent.toString().toLowerCase();
 
                         return (
                             <div
@@ -186,7 +186,7 @@ function ChatPanel({
                                     >
                                         {isAgent
                                             ? "You"
-                                            : conversation.customerName}
+                                            : conversation.customerName || "Anonymous"}
                                     </div>
 
                                     <div

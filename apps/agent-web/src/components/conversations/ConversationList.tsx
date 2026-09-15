@@ -89,7 +89,7 @@ function ConversationList({
                                 }
                             >
                                 {getInitials(
-                                    conversation.customerName
+                                    conversation.customerName || "Anonymous"
                                 )}
                             </div>
 
@@ -109,7 +109,7 @@ function ConversationList({
                                         }
                                     >
                                         {
-                                            conversation.customerName
+                                            conversation.customerName || "Anonymous"
                                         }
                                     </span>
 

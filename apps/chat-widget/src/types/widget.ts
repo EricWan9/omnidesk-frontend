@@ -8,17 +8,27 @@ export interface StartWidgetConversationResponse {
   accessToken: string;
 }
 
+export const MessageSenderType = {
+    Agent: 0,
+    Customer: 1,
+    Ai: 2,
+    System: 3,
+} as const;
+
 export type MessageSenderType =
-  | "Agent"
-  | "Customer"
-  | "Ai"
-  | "System";
+    typeof MessageSenderType[
+        keyof typeof MessageSenderType
+    ];
+
+export interface MessageSender {
+    type: MessageSenderType;
+    id: string | null;
+}
 
 export interface Message {
-  id: string;
-  conversationId: string;
-  senderType: MessageSenderType;
-  senderId: string | null;
-  content: string;
-  createdAt: string;
+    id: string;
+    conversationId: string;
+    messageSender: MessageSender;
+    content: string;
+    createdAt: string;
 }

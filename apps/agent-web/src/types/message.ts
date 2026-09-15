@@ -1,12 +1,24 @@
+export const MessageSenderType = {
+    Agent: 0,
+    Customer: 1,
+    Ai: 2,
+    System: 3,
+} as const;
+
 export type MessageSenderType =
-    | "customer"
-    | "agent";
+    typeof MessageSenderType[
+        keyof typeof MessageSenderType
+    ];
+
+export interface MessageSender {
+    type: MessageSenderType;
+    id: string | null;
+}
 
 export interface Message {
     id: string;
     conversationId: string;
-    senderType: MessageSenderType;
-    senderId: string | null;
+    messageSender: MessageSender;
     content: string;
     createdAt: string;
 }

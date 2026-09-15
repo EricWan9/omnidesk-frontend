@@ -18,7 +18,7 @@ function ConversationItem({
         >
             <div>
                 {isSelected ? "> " : ""}
-                {conversation.customerName}
+                {conversation.customerName || "Anonymous"}
             </div>
 
             <div>

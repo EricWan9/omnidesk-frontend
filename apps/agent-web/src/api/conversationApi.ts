@@ -19,8 +19,14 @@ export async function getMessages(
     pageSize: number = 50
 ): Promise<Message[]> {
 
-    return apiFetch<Message[]>(
+    const messages = await apiFetch<Message[]>(
         `/workspace/conversations/${conversationId}/messages?pageSize=${pageSize}`
+    );
+
+    return [...messages].sort(
+        (a, b) =>
+            new Date(a.createdAt).getTime() -
+            new Date(b.createdAt).getTime()
     );
 }
 

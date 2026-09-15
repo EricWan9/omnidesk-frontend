@@ -5,8 +5,8 @@ export type ConversationStatus =
 
 export interface Conversation {
     id: string;
-    customerName: string;
-    customerEmail: string;
+    customerName: string | null;
+    customerEmail: string | null;
     status: number;
     assignedUserId: string | null;
     lastMessage: string | null;
