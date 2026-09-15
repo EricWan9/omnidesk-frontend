@@ -32,19 +32,24 @@ export async function getMessages(
 
 export async function sendMessage(
     conversationId: string,
-    content: string
+    content: string,
+    files: File[] = []
 ): Promise<Message> {
+    const formData = new FormData();
+
+    if (content.trim()) {
+        formData.append("content", content);
+    }
+
+    for (const file of files) {
+        formData.append("files", file);
+    }
 
     return apiFetch<Message>(
         `/workspace/conversations/${conversationId}/messages`,
         {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                content,
-            }),
+            body: formData,
         }
     );
 }

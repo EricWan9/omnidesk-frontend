@@ -2,6 +2,7 @@ import type {
   Message,
   StartWidgetConversationResponse,
 } from "../types/widget";
+import { widgetApiFetch } from "./apiClient";
 
 export class ApiError extends Error {
   constructor(
@@ -71,28 +72,54 @@ export async function getWidgetMessages(
 }
 
 export async function sendWidgetMessage(
-  conversationId: string,
-  accessToken: string,
-  content: string,
+    conversationId: string,
+    accessToken: string,
+    content: string,
+    files: File[] = []
 ): Promise<Message> {
-  const response = await fetch(
-    `/api/widget/conversations/${conversationId}/messages`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        content,
-      }),
-    },
-  );
+    const formData = new FormData();
 
-  await ensureSuccess(
-    response,
-    "Failed to send message",
-  );
+    if (content.trim()) {
+        formData.append("content", content);
+    }
 
-  return response.json();
+    for (const file of files) {
+        formData.append("files", file);
+    }
+
+    return widgetApiFetch<Message>(
+        `/api/widget/conversations/${conversationId}/messages`,
+        accessToken,
+        {
+            method: "POST",
+            body: formData,
+        }
+    );
+}
+
+export async function getWidgetAttachmentBlob(
+    attachmentId: string,
+    accessToken: string,
+    signal?: AbortSignal
+): Promise<Blob> {
+
+    const response =
+        await fetch(
+            `/api/attachments/${attachmentId}`,
+            {
+                signal,
+                headers: {
+                    Authorization:
+                        `Bearer ${accessToken}`,
+                },
+            }
+        );
+
+    if (!response.ok) {
+        throw new Error(
+            `Request failed: ${response.status}`
+        );
+    }
+
+    return await response.blob();
 }

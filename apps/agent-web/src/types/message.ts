@@ -15,10 +15,18 @@ export interface MessageSender {
     id: string | null;
 }
 
+export interface MessageAttachment {
+    id: string;
+    fileName: string;
+    contentType: string;
+    size: number;
+}
+
 export interface Message {
     id: string;
     conversationId: string;
     messageSender: MessageSender;
-    content: string;
+    content: string | null;
     createdAt: string;
+    attachments: MessageAttachment[];
 }

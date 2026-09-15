@@ -275,16 +275,34 @@ function AgentWorkspacePage() {
         );
 
     async function handleSendMessage(
-        content: string
+        content: string,
+        files: File[]
     ): Promise<void> {
+
         if (selectedConversationId === null) {
             return;
         }
 
-        await sendMessage(
-            selectedConversationId,
-            content
-        );
+        if (
+            !content.trim() &&
+            files.length === 0
+        ) {
+            return;
+        }
+
+        try {
+            await sendMessage(
+                selectedConversationId,
+                content,
+                files
+            );
+        }
+        catch (error) {
+            console.error(
+                "Failed to send message.",
+                error
+            );
+        }
     }
 
     return (

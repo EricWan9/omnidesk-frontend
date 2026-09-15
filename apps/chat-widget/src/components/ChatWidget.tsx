@@ -13,8 +13,9 @@ import {
 
 import { widgetKey } from "../config";
 
-import { createWidgetSignalRConnection }
-  from "../realtime/widgetSignalR";
+import {
+  createWidgetSignalRConnection,
+} from "../realtime/widgetSignalR";
 
 import {
   clearWidgetSession,
@@ -23,12 +24,17 @@ import {
 } from "../session/widgetSession";
 
 import {
-    MessageSenderType,
+  MessageSenderType,
   type Message,
   type WidgetSession,
 } from "../types/widget";
 
-import styles from "./ChatWidget.module.css";
+import MessageAttachments
+  from "./MessageAttachments";
+
+import styles
+  from "./ChatWidget.module.css";
+
 
 type ConnectionState =
   | "disconnected"
@@ -36,49 +42,79 @@ type ConnectionState =
   | "connected"
   | "reconnecting";
 
+
+const MAX_FILE_COUNT = 5;
+
+const MAX_FILE_SIZE =
+  10 * 1024 * 1024;
+
+const ALLOWED_FILE_TYPES =
+  new Set([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+    "text/plain",
+  ]);
+
+
 let sessionCreationPromise:
   Promise<WidgetSession> | null = null;
 
+
 async function createSession():
   Promise<WidgetSession> {
+
   if (sessionCreationPromise) {
     return sessionCreationPromise;
   }
 
-  sessionCreationPromise = (async () => {
-    const result =
-      await startWidgetConversation(widgetKey);
+  sessionCreationPromise =
+    (async () => {
 
-    const session: WidgetSession = {
-      conversationId:
-        result.conversationId,
-      accessToken:
-        result.accessToken,
-    };
+      const result =
+        await startWidgetConversation(
+          widgetKey,
+        );
 
-    saveWidgetSession(
-      widgetKey,
-      session,
-    );
+      const session:
+        WidgetSession = {
 
-    return session;
-  })();
+        conversationId:
+          result.conversationId,
+
+        accessToken:
+          result.accessToken,
+      };
+
+      saveWidgetSession(
+        widgetKey,
+        session,
+      );
+
+      return session;
+
+    })();
 
   try {
     return await sessionCreationPromise;
-  } finally {
+  }
+  finally {
     sessionCreationPromise = null;
   }
 }
+
 
 function appendUniqueMessage(
   messages: Message[],
   newMessage: Message,
 ): Message[] {
+
   const exists =
     messages.some(
       message =>
-        message.id === newMessage.id,
+        message.id ===
+        newMessage.id,
     );
 
   if (exists) {
@@ -91,12 +127,14 @@ function appendUniqueMessage(
   ];
 }
 
+
 function formatTime(
   dateValue: string,
 ): string {
-  const date = new Date(dateValue);
 
-  return date.toLocaleTimeString(
+  return new Date(
+    dateValue,
+  ).toLocaleTimeString(
     [],
     {
       hour: "2-digit",
@@ -105,10 +143,14 @@ function formatTime(
   );
 }
 
+
 function getSenderLabel(
   message: Message,
 ): string {
-  switch (message.messageSender.type) {
+
+  switch (
+    message.messageSender.type
+  ) {
     case MessageSenderType.Customer:
       return "You";
 
@@ -126,27 +168,68 @@ function getSenderLabel(
   }
 }
 
+
 export default function ChatWidget() {
-  const [isOpen, setIsOpen] =
+
+  const [
+    isOpen,
+    setIsOpen,
+  ] =
     useState(false);
 
-  const [session, setSession] =
-    useState<WidgetSession | null>(null);
+  const [
+    session,
+    setSession,
+  ] =
+    useState<
+      WidgetSession | null
+    >(null);
 
-  const [messages, setMessages] =
+  const [
+    messages,
+    setMessages,
+  ] =
     useState<Message[]>([]);
 
-  const [draft, setDraft] =
+  const [
+    draft,
+    setDraft,
+  ] =
     useState("");
 
-  const [isInitializing, setIsInitializing] =
+  const [
+    selectedFiles,
+    setSelectedFiles,
+  ] =
+    useState<File[]>([]);
+
+  const [
+    fileError,
+    setFileError,
+  ] =
+    useState<string | null>(
+      null,
+    );
+
+  const [
+    isInitializing,
+    setIsInitializing,
+  ] =
     useState(false);
 
-  const [isSending, setIsSending] =
+  const [
+    isSending,
+    setIsSending,
+  ] =
     useState(false);
 
-  const [error, setError] =
-    useState<string | null>(null);
+  const [
+    error,
+    setError,
+  ] =
+    useState<string | null>(
+      null,
+    );
 
   const [
     connectionState,
@@ -156,13 +239,26 @@ export default function ChatWidget() {
       "disconnected",
     );
 
+
   const messagesEndRef =
-    useRef<HTMLDivElement | null>(null);
+    useRef<HTMLDivElement | null>(
+      null,
+    );
+
+  const fileInputRef =
+    useRef<HTMLInputElement | null>(
+      null,
+    );
 
   const initializedRef =
     useRef(false);
 
+
+  /*
+   * Initialize widget session
+   */
   useEffect(() => {
+
     if (
       !isOpen ||
       initializedRef.current
@@ -174,28 +270,42 @@ export default function ChatWidget() {
 
     let cancelled = false;
 
+
     async function initialize() {
+
       setIsInitializing(true);
       setError(null);
 
       try {
+
         let currentSession =
-          getWidgetSession(widgetKey);
+          getWidgetSession(
+            widgetKey,
+          );
 
         if (!currentSession) {
+
           currentSession =
             await createSession();
         }
 
-        let loadedMessages: Message[];
+
+        let loadedMessages:
+          Message[];
 
         try {
+
           loadedMessages =
             await getWidgetMessages(
-              currentSession.conversationId,
-              currentSession.accessToken,
+              currentSession
+                .conversationId,
+
+              currentSession
+                .accessToken,
             );
-        } catch (err) {
+        }
+        catch (err) {
+
           const sessionExpired =
             err instanceof ApiError &&
             (
@@ -207,25 +317,38 @@ export default function ChatWidget() {
             throw err;
           }
 
-          clearWidgetSession(widgetKey);
+          clearWidgetSession(
+            widgetKey,
+          );
 
           currentSession =
             await createSession();
 
           loadedMessages =
             await getWidgetMessages(
-              currentSession.conversationId,
-              currentSession.accessToken,
+              currentSession
+                .conversationId,
+
+              currentSession
+                .accessToken,
             );
         }
+
 
         if (cancelled) {
           return;
         }
 
-        setSession(currentSession);
-        setMessages(loadedMessages);
-      } catch (err) {
+        setSession(
+          currentSession,
+        );
+
+        setMessages(
+          loadedMessages,
+        );
+      }
+      catch (err) {
+
         if (cancelled) {
           return;
         }
@@ -235,21 +358,33 @@ export default function ChatWidget() {
             ? err.message
             : "Unable to start chat.",
         );
-      } finally {
+      }
+      finally {
+
         if (!cancelled) {
-          setIsInitializing(false);
+          setIsInitializing(
+            false,
+          );
         }
       }
     }
 
+
     void initialize();
+
 
     return () => {
       cancelled = true;
     };
+
   }, [isOpen]);
 
+
+  /*
+   * SignalR
+   */
   useEffect(() => {
+
     if (!session) {
       return;
     }
@@ -261,36 +396,48 @@ export default function ChatWidget() {
 
     let disposed = false;
 
+
     const handleMessage =
       (message: Message) => {
-        setMessages(current =>
-          appendUniqueMessage(
-            current,
-            message,
-          ),
+
+        setMessages(
+          current =>
+            appendUniqueMessage(
+              current,
+              message,
+            ),
         );
       };
+
 
     connection.on(
       "MessageSent",
       handleMessage,
     );
 
-    connection.onreconnecting(() => {
-      if (!disposed) {
-        setConnectionState(
-          "reconnecting",
-        );
-      }
-    });
+
+    connection.onreconnecting(
+      () => {
+
+        if (!disposed) {
+
+          setConnectionState(
+            "reconnecting",
+          );
+        }
+      },
+    );
+
 
     connection.onreconnected(
       async () => {
+
         if (disposed) {
           return;
         }
 
         try {
+
           await connection.invoke(
             "SubscribeConversation",
             session.conversationId,
@@ -299,7 +446,14 @@ export default function ChatWidget() {
           setConnectionState(
             "connected",
           );
-        } catch {
+        }
+        catch (err) {
+
+          console.error(
+            "Failed to resubscribe conversation.",
+            err,
+          );
+
           setConnectionState(
             "disconnected",
           );
@@ -307,37 +461,53 @@ export default function ChatWidget() {
       },
     );
 
-    connection.onclose(() => {
-      if (!disposed) {
-        setConnectionState(
-          "disconnected",
-        );
-      }
-    });
+
+    connection.onclose(
+      () => {
+
+        if (!disposed) {
+
+          setConnectionState(
+            "disconnected",
+          );
+        }
+      },
+    );
+
 
     async function connect() {
+
       try {
+
         setConnectionState(
           "connecting",
         );
 
         await connection.start();
 
+
         if (disposed) {
+
           await connection.stop();
+
           return;
         }
+
 
         await connection.invoke(
           "SubscribeConversation",
           session.conversationId,
         );
 
+
         setConnectionState(
           "connected",
         );
-      } catch (err) {
+      }
+      catch (err) {
+
         if (!disposed) {
+
           console.error(
             "SignalR connection failed.",
             err,
@@ -350,9 +520,12 @@ export default function ChatWidget() {
       }
     }
 
+
     void connect();
 
+
     return () => {
+
       disposed = true;
 
       connection.off(
@@ -362,91 +535,263 @@ export default function ChatWidget() {
 
       void connection.stop();
     };
+
   }, [session]);
 
+
+  /*
+   * Auto scroll
+   */
   useEffect(() => {
+
     messagesEndRef.current
       ?.scrollIntoView({
         behavior: "smooth",
       });
+
   }, [messages]);
 
+
+  /*
+   * File selection
+   */
+  function handleFileChange(
+    event:
+      React.ChangeEvent<HTMLInputElement>,
+  ) {
+
+    const incomingFiles =
+      Array.from(
+        event.target.files ?? [],
+      );
+
+    // Allow selecting the same file again.
+    event.target.value = "";
+
+
+    if (
+      incomingFiles.length === 0
+    ) {
+      return;
+    }
+
+
+    const invalidType =
+      incomingFiles.find(
+        file =>
+          !ALLOWED_FILE_TYPES
+            .has(file.type),
+      );
+
+    if (invalidType) {
+
+      setFileError(
+        `Unsupported file type: ${invalidType.name}`,
+      );
+
+      return;
+    }
+
+
+    const tooLarge =
+      incomingFiles.find(
+        file =>
+          file.size >
+          MAX_FILE_SIZE,
+      );
+
+    if (tooLarge) {
+
+      setFileError(
+        `${tooLarge.name} exceeds 10 MB.`,
+      );
+
+      return;
+    }
+
+
+    const emptyFile =
+      incomingFiles.find(
+        file =>
+          file.size <= 0,
+      );
+
+    if (emptyFile) {
+
+      setFileError(
+        `${emptyFile.name} is empty.`,
+      );
+
+      return;
+    }
+
+
+    setFileError(null);
+
+
+    setSelectedFiles(
+      current => {
+
+        const combined = [
+          ...current,
+          ...incomingFiles,
+        ];
+
+        if (
+          combined.length >
+          MAX_FILE_COUNT
+        ) {
+
+          setFileError(
+            "Maximum 5 attachments per message.",
+          );
+        }
+
+        return combined.slice(
+          0,
+          MAX_FILE_COUNT,
+        );
+      },
+    );
+  }
+
+
+  function removeSelectedFile(
+    index: number,
+  ) {
+
+    setSelectedFiles(
+      current =>
+        current.filter(
+          (_, currentIndex) =>
+            currentIndex !== index,
+        ),
+    );
+
+    setFileError(null);
+  }
+
+
+  /*
+   * Send message
+   */
   async function handleSend() {
+
     const content =
       draft.trim();
 
+
     if (
-      !content ||
+      (
+        !content &&
+        selectedFiles.length === 0
+      ) ||
       !session ||
       isSending
     ) {
       return;
     }
 
+
     setIsSending(true);
     setError(null);
 
+
     try {
+
       const message =
         await sendWidgetMessage(
           session.conversationId,
           session.accessToken,
           content,
+          selectedFiles,
         );
 
-      setMessages(current =>
-        appendUniqueMessage(
-          current,
-          message,
-        ),
+
+      setMessages(
+        current =>
+          appendUniqueMessage(
+            current,
+            message,
+          ),
       );
 
+
       setDraft("");
-    } catch (err) {
+
+      setSelectedFiles([]);
+
+      setFileError(null);
+    }
+    catch (err) {
+
       setError(
         err instanceof Error
           ? err.message
           : "Failed to send message.",
       );
-    } finally {
+    }
+    finally {
+
       setIsSending(false);
     }
   }
 
+
+  /*
+   * Enter sends.
+   * Shift+Enter creates newline.
+   */
   function handleKeyDown(
     event:
       React.KeyboardEvent<HTMLTextAreaElement>,
   ) {
+
     if (
       event.key === "Enter" &&
       !event.shiftKey
     ) {
+
       event.preventDefault();
 
       void handleSend();
     }
   }
 
+
   const statusText =
     connectionState === "connected"
       ? "Online"
+
       : connectionState ===
           "reconnecting"
         ? "Reconnecting..."
+
         : connectionState ===
             "connecting"
           ? "Connecting..."
+
           : "Offline";
+
 
   return (
     <>
       {isOpen && (
+
         <section
-          className={styles.widget}
-          aria-label="Customer support chat"
+          className={
+            styles.widget
+          }
+          aria-label={
+            "Customer support chat"
+          }
         >
+
+          {/* Header */}
           <header
-            className={styles.header}
+            className={
+              styles.header
+            }
           >
             <div
               className={
@@ -462,6 +807,7 @@ export default function ChatWidget() {
               </div>
 
               <div>
+
                 <h1
                   className={
                     styles.title
@@ -476,18 +822,21 @@ export default function ChatWidget() {
                   }
                 >
                   <span
-                    className={`${styles.statusDot} ${
-                      connectionState ===
-                      "connected"
-                        ? styles.statusDotOnline
-                        : ""
-                    }`}
+                    className={
+                      `${styles.statusDot} ${
+                        connectionState ===
+                        "connected"
+                          ? styles.statusDotOnline
+                          : ""
+                      }`
+                    }
                   />
 
                   {statusText}
                 </div>
               </div>
             </div>
+
 
             <button
               type="button"
@@ -497,18 +846,24 @@ export default function ChatWidget() {
               onClick={() =>
                 setIsOpen(false)
               }
-              aria-label="Close chat"
+              aria-label={
+                "Close chat"
+              }
             >
               ×
             </button>
           </header>
 
+
+          {/* Messages */}
           <main
             className={
               styles.messageArea
             }
           >
+
             {isInitializing ? (
+
               <div
                 className={
                   styles.centerState
@@ -524,7 +879,9 @@ export default function ChatWidget() {
                   Starting chat...
                 </span>
               </div>
+
             ) : messages.length === 0 ? (
+
               <div
                 className={
                   styles.welcome
@@ -548,23 +905,35 @@ export default function ChatWidget() {
                   get back to you.
                 </p>
               </div>
+
             ) : (
+
               <div
                 className={
                   styles.messages
                 }
               >
+
                 {messages.map(
                   message => {
+
                     const isCustomer =
-                      message.messageSender.type ===
-                      MessageSenderType.Customer;
+                      message
+                        .messageSender
+                        .type ===
+                      MessageSenderType
+                        .Customer;
 
                     const isSystem =
-                      message.messageSender.type ===
-                      MessageSenderType.System;
+                      message
+                        .messageSender
+                        .type ===
+                      MessageSenderType
+                        .System;
+
 
                     if (isSystem) {
+
                       return (
                         <div
                           key={
@@ -581,58 +950,90 @@ export default function ChatWidget() {
                       );
                     }
 
+
                     return (
                       <article
                         key={
                           message.id
                         }
-                        className={`${styles.messageRow} ${
-                          isCustomer
-                            ? styles.messageRowCustomer
-                            : styles.messageRowOther
-                        }`}
-                      >
-                        <div
-                          className={`${styles.messageBubble} ${
+                        className={
+                          `${styles.messageRow} ${
                             isCustomer
-                              ? styles.customerBubble
-                              : styles.agentBubble
-                          }`}
+                              ? styles.messageRowCustomer
+                              : styles.messageRowOther
+                          }`
+                        }
+                      >
+
+                        <div
+                          className={
+                            `${styles.messageBubble} ${
+                              isCustomer
+                                ? styles.customerBubble
+                                : styles.agentBubble
+                            }`
+                          }
                         >
+
                           <div
                             className={
                               styles.messageSender
                             }
                           >
-                            {getSenderLabel(
-                              message,
-                            )}
+                            {
+                              getSenderLabel(
+                                message,
+                              )
+                            }
                           </div>
 
-                          <div
-                            className={
-                              styles.messageContent
-                            }
-                          >
-                            {
-                              message.content
-                            }
-                          </div>
+
+                          {message.content && (
+
+                            <div
+                              className={
+                                styles.messageContent
+                              }
+                            >
+                              {
+                                message.content
+                              }
+                            </div>
+                          )}
+
+
+                          {session && (
+
+                            <MessageAttachments
+                              attachments={
+                                message.attachments ??
+                                []
+                              }
+                              accessToken={
+                                session.accessToken
+                              }
+                            />
+                          )}
+
 
                           <time
                             className={
                               styles.messageTime
                             }
                           >
-                            {formatTime(
-                              message.createdAt,
-                            )}
+                            {
+                              formatTime(
+                                message.createdAt,
+                              )
+                            }
                           </time>
+
                         </div>
                       </article>
                     );
                   },
                 )}
+
 
                 <div
                   ref={
@@ -643,6 +1044,8 @@ export default function ChatWidget() {
             )}
           </main>
 
+
+          {/* General API error */}
           {error && (
             <div
               className={
@@ -653,33 +1056,164 @@ export default function ChatWidget() {
             </div>
           )}
 
+
+          {/* File validation error */}
+          {fileError && (
+            <div
+              className={
+                styles.errorBanner
+              }
+            >
+              {fileError}
+            </div>
+          )}
+
+
+          {/* Files waiting to be sent */}
+          {selectedFiles.length > 0 && (
+
+            <div
+              className={
+                styles.selectedFiles
+              }
+            >
+
+              {selectedFiles.map(
+                (
+                  file,
+                  index,
+                ) => (
+
+                  <div
+                    key={
+                      `${file.name}-${file.size}-${index}`
+                    }
+                    className={
+                      styles.selectedFile
+                    }
+                  >
+
+                    <span
+                      className={
+                        styles.selectedFileName
+                      }
+                    >
+                      {file.name}
+                    </span>
+
+
+                    <button
+                      type="button"
+                      disabled={
+                        isSending
+                      }
+                      className={
+                        styles.removeFileButton
+                      }
+                      onClick={() =>
+                        removeSelectedFile(
+                          index,
+                        )
+                      }
+                      aria-label={
+                        `Remove ${file.name}`
+                      }
+                    >
+                      ×
+                    </button>
+
+                  </div>
+                ),
+              )}
+
+            </div>
+          )}
+
+
+          {/* Composer */}
           <footer
             className={
               styles.composer
             }
           >
+
+            <input
+              ref={
+                fileInputRef
+              }
+              type="file"
+              multiple
+              hidden
+              disabled={
+                !session ||
+                isInitializing ||
+                isSending
+              }
+              accept="image/jpeg,image/png,image/webp,application/pdf,text/plain"
+              onChange={
+                handleFileChange
+              }
+            />
+
+
+            <button
+              type="button"
+              className={
+                styles.attachButton
+              }
+              disabled={
+                !session ||
+                isInitializing ||
+                isSending
+              }
+              onClick={() =>
+                fileInputRef
+                  .current
+                  ?.click()
+              }
+              aria-label={
+                "Attach files"
+              }
+            >
+              📎
+            </button>
+
+
             <textarea
-              value={draft}
-              onChange={event =>
-                setDraft(
-                  event.target.value,
-                )
+              value={
+                draft
+              }
+              onChange={
+                event =>
+                  setDraft(
+                    event.target.value,
+                  )
               }
               onKeyDown={
                 handleKeyDown
               }
               disabled={
                 !session ||
-                isInitializing
+                isInitializing ||
+                isSending
               }
-              rows={1}
-              maxLength={2000}
-              placeholder="Write a message..."
+              rows={
+                1
+              }
+              maxLength={
+                2000
+              }
+              placeholder={
+                "Write a message..."
+              }
               className={
                 styles.textarea
               }
-              aria-label="Message"
+              aria-label={
+                "Message"
+              }
             />
+
 
             <button
               type="button"
@@ -687,22 +1221,31 @@ export default function ChatWidget() {
                 styles.sendButton
               }
               disabled={
-                !draft.trim() ||
+                (
+                  !draft.trim() &&
+                  selectedFiles.length === 0
+                ) ||
                 !session ||
                 isSending
               }
               onClick={() =>
                 void handleSend()
               }
-              aria-label="Send message"
+              aria-label={
+                "Send message"
+              }
             >
+
               {isSending ? (
+
                 <span
                   className={
                     styles.sendSpinner
                   }
                 />
+
               ) : (
+
                 <svg
                   width="20"
                   height="20"
@@ -716,8 +1259,11 @@ export default function ChatWidget() {
                   />
                 </svg>
               )}
+
             </button>
+
           </footer>
+
 
           <div
             className={
@@ -726,16 +1272,22 @@ export default function ChatWidget() {
           >
             Powered by OmniDesk
           </div>
+
         </section>
       )}
 
+
+      {/* Launcher */}
       <button
         type="button"
         className={
           styles.launcher
         }
         onClick={() =>
-          setIsOpen(current => !current)
+          setIsOpen(
+            current =>
+              !current,
+          )
         }
         aria-label={
           isOpen
@@ -743,7 +1295,9 @@ export default function ChatWidget() {
             : "Open support chat"
         }
       >
+
         {isOpen ? (
+
           <span
             className={
               styles.launcherClose
@@ -751,7 +1305,9 @@ export default function ChatWidget() {
           >
             ×
           </span>
+
         ) : (
+
           <svg
             width="28"
             height="28"
@@ -765,6 +1321,7 @@ export default function ChatWidget() {
             />
           </svg>
         )}
+
       </button>
     </>
   );

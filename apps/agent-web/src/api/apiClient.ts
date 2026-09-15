@@ -8,7 +8,12 @@ export async function apiFetch<T>(
 
     const headers = new Headers(options.headers);
 
-    headers.set("Accept", "application/json");
+    if (!(options.body instanceof FormData)) {
+        headers.set(
+            "Content-Type",
+            "application/json"
+        );
+    }
 
     if (token) {
         headers.set(
@@ -17,17 +22,14 @@ export async function apiFetch<T>(
         );
     }
 
-    const response = await fetch(
-        `/api${path}`,
-        {
-            ...options,
-            headers,
-        }
-    );
+    const response = await fetch(`/api${path}`, {
+        ...options,
+        headers,
+    });
 
     if (!response.ok) {
         throw new Error(
-            `Request failed with status ${response.status}`
+            `Request failed: ${response.status}`
         );
     }
 
@@ -35,7 +37,40 @@ export async function apiFetch<T>(
         return undefined as T;
     }
 
-    const data: T = await response.json();
+    return await response.json() as T;
+}
 
-    return data;
+export async function apiFetchBlob(
+    url: string,
+    options: RequestInit = {}
+): Promise<Blob> {
+
+    const token = getAccessToken();
+
+    const headers =
+        new Headers(options.headers);
+
+    if (token) {
+        headers.set(
+            "Authorization",
+            `Bearer ${token}`
+        );
+    }
+
+    const response =
+        await fetch(
+            url,
+            {
+                ...options,
+                headers,
+            }
+        );
+
+    if (!response.ok) {
+        throw new Error(
+            `Request failed: ${response.status}`
+        );
+    }
+
+    return await response.blob();
 }

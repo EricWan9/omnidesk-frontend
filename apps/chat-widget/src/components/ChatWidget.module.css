@@ -552,3 +552,59 @@
     max-width: 88%;
   }
 }
+
+.attachButton {
+  flex: 0 0 auto;
+
+  border: none;
+  background: transparent;
+
+  font-size: 20px;
+  cursor: pointer;
+
+  padding: 8px;
+}
+
+.attachButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.selectedFiles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  padding: 8px 12px;
+
+  border-top: 1px solid
+    rgba(0, 0, 0, 0.06);
+
+  background: #fafafa;
+}
+
+.selectedFile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  font-size: 12px;
+}
+
+.selectedFileName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.removeFileButton {
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
+
+  font-size: 18px;
+  line-height: 1;
+}
