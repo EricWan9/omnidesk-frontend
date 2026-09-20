@@ -1,4 +1,4 @@
-import type { Message } from "../../types/message";
+import { MessageSenderType, type Message } from "../../types/message";
 
 interface MessageItemProps {
     message: Message;
@@ -10,7 +10,7 @@ function MessageItem({
     return (
         <div>
             <strong>
-                {message.senderType === 1
+                {message.messageSender.type === MessageSenderType.Agent
                     ? "Agent"
                     : "Customer"}
             </strong>

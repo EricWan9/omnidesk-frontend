@@ -1,5 +1,8 @@
 import { getAccessToken } from "../auth/tokenStore";
 
+const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL ?? "";
+
 export async function apiFetch<T>(
     path: string,
     options: RequestInit = {}
@@ -22,7 +25,7 @@ export async function apiFetch<T>(
         );
     }
 
-    const response = await fetch(`/api${path}`, {
+    const response = await fetch(`${API_BASE_URL}/api${path}`, {
         ...options,
         headers,
     });
@@ -59,7 +62,7 @@ export async function apiFetchBlob(
 
     const response =
         await fetch(
-            url,
+            `${API_BASE_URL}${url}`,
             {
                 ...options,
                 headers,
