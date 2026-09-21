@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - test
+    paths:
+      - "apps/agent-web/**"
+      - ".github/workflows/agent-test.yml"
 
   workflow_dispatch:
 
