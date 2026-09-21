@@ -8,14 +8,33 @@ import {
     getAccessToken,
 } from "../auth/tokenStore";
 
-export function createConversationHubConnection(): HubConnection {
+
+const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL
+        ?.replace(/\/+$/, "");
+
+
+if (!API_BASE_URL) {
+    throw new Error(
+        "VITE_API_BASE_URL is not configured."
+    );
+}
+
+
+export function createConversationHubConnection():
+    HubConnection {
 
     return new HubConnectionBuilder()
-        .withUrl("/hubs/conversations", {
-            accessTokenFactory: () =>
-                getAccessToken() ?? "",
-        })
+        .withUrl(
+            `${API_BASE_URL}/hubs/conversations`,
+            {
+                accessTokenFactory: () =>
+                    getAccessToken() ?? "",
+            }
+        )
         .withAutomaticReconnect()
-        .configureLogging(LogLevel.Information)
+        .configureLogging(
+            LogLevel.Information
+        )
         .build();
 }
