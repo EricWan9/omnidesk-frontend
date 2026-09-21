@@ -5,13 +5,10 @@ import {
 } from "react";
 
 import {
-  ApiError,
   getWidgetMessages,
   sendWidgetMessage,
   startWidgetConversation,
 } from "../api/widgetApi";
-
-import { widgetKey } from "../config";
 
 import {
   createWidgetSignalRConnection,
@@ -28,6 +25,10 @@ import {
   type Message,
   type WidgetSession,
 } from "../types/widget";
+
+import {
+  ApiError,
+} from "../api/apiClient";
 
 import MessageAttachments
   from "./MessageAttachments";
@@ -62,8 +63,16 @@ let sessionCreationPromise:
   Promise<WidgetSession> | null = null;
 
 
-async function createSession():
-  Promise<WidgetSession> {
+/*
+ * Create a new anonymous widget session.
+ *
+ * widgetKey is runtime configuration.
+ * It must come from the embedding customer's
+ * widget instance, not from build-time config.
+ */
+async function createSession(
+  widgetKey: string,
+): Promise<WidgetSession> {
 
   if (sessionCreationPromise) {
     return sessionCreationPromise;
@@ -151,6 +160,7 @@ function getSenderLabel(
   switch (
     message.messageSender.type
   ) {
+
     case MessageSenderType.Customer:
       return "You";
 
@@ -170,6 +180,33 @@ function getSenderLabel(
 
 
 export default function ChatWidget() {
+
+  const [
+    widgetKey,
+  ] =
+    useState<string | null>(
+      () => {
+
+        const params =
+          new URLSearchParams(
+            window.location.search,
+          );
+
+        const value =
+          params
+            .get("widgetKey")
+            ?.trim();
+
+        return value || null;
+      },
+    );
+
+  if(widgetKey === null) {
+    return;
+  }
+  
+  const widgetKeySafe = widgetKey;
+
 
   const [
     isOpen,
@@ -266,6 +303,17 @@ export default function ChatWidget() {
       return;
     }
 
+
+    if (!widgetKey) {
+
+      setError(
+        "Widget key is missing.",
+      );
+
+      return;
+    }
+
+
     initializedRef.current = true;
 
     let cancelled = false;
@@ -280,18 +328,22 @@ export default function ChatWidget() {
 
         let currentSession =
           getWidgetSession(
-            widgetKey,
+            widgetKeySafe,
           );
+
 
         if (!currentSession) {
 
           currentSession =
-            await createSession();
+            await createSession(
+              widgetKeySafe,
+            );
         }
 
 
         let loadedMessages:
           Message[];
+
 
         try {
 
@@ -313,16 +365,22 @@ export default function ChatWidget() {
               err.status === 403
             );
 
+
           if (!sessionExpired) {
             throw err;
           }
 
+
           clearWidgetSession(
-            widgetKey,
+            widgetKeySafe,
           );
 
+
           currentSession =
-            await createSession();
+            await createSession(
+              widgetKeySafe,
+            );
+
 
           loadedMessages =
             await getWidgetMessages(
@@ -339,6 +397,7 @@ export default function ChatWidget() {
           return;
         }
 
+
         setSession(
           currentSession,
         );
@@ -353,6 +412,7 @@ export default function ChatWidget() {
           return;
         }
 
+
         setError(
           err instanceof Error
             ? err.message
@@ -362,6 +422,7 @@ export default function ChatWidget() {
       finally {
 
         if (!cancelled) {
+
           setIsInitializing(
             false,
           );
@@ -377,7 +438,10 @@ export default function ChatWidget() {
       cancelled = true;
     };
 
-  }, [isOpen]);
+  }, [
+    isOpen,
+    widgetKey,
+  ]);
 
 
   /*
@@ -389,10 +453,22 @@ export default function ChatWidget() {
       return;
     }
 
+
+    /*
+     * Capture the current session.
+     *
+     * This avoids nullable closure issues
+     * after await / reconnect callbacks.
+     */
+    const currentSession =
+      session;
+
+
     const connection =
       createWidgetSignalRConnection(
-        session.accessToken,
+        currentSession.accessToken,
       );
+
 
     let disposed = false;
 
@@ -436,12 +512,15 @@ export default function ChatWidget() {
           return;
         }
 
+
         try {
 
           await connection.invoke(
             "SubscribeConversation",
-            session.conversationId,
+            currentSession
+              .conversationId,
           );
+
 
           setConnectionState(
             "connected",
@@ -453,6 +532,7 @@ export default function ChatWidget() {
             "Failed to resubscribe conversation.",
             err,
           );
+
 
           setConnectionState(
             "disconnected",
@@ -483,6 +563,7 @@ export default function ChatWidget() {
           "connecting",
         );
 
+
         await connection.start();
 
 
@@ -496,7 +577,8 @@ export default function ChatWidget() {
 
         await connection.invoke(
           "SubscribeConversation",
-          session.conversationId,
+          currentSession
+            .conversationId,
         );
 
 
@@ -513,6 +595,7 @@ export default function ChatWidget() {
             err,
           );
 
+
           setConnectionState(
             "disconnected",
           );
@@ -528,10 +611,12 @@ export default function ChatWidget() {
 
       disposed = true;
 
+
       connection.off(
         "MessageSent",
         handleMessage,
       );
+
 
       void connection.stop();
     };
@@ -565,7 +650,11 @@ export default function ChatWidget() {
         event.target.files ?? [],
       );
 
-    // Allow selecting the same file again.
+
+    /*
+     * Allow selecting the same
+     * file again.
+     */
     event.target.value = "";
 
 
@@ -582,6 +671,7 @@ export default function ChatWidget() {
           !ALLOWED_FILE_TYPES
             .has(file.type),
       );
+
 
     if (invalidType) {
 
@@ -600,6 +690,7 @@ export default function ChatWidget() {
           MAX_FILE_SIZE,
       );
 
+
     if (tooLarge) {
 
       setFileError(
@@ -615,6 +706,7 @@ export default function ChatWidget() {
         file =>
           file.size <= 0,
       );
+
 
     if (emptyFile) {
 
@@ -637,6 +729,7 @@ export default function ChatWidget() {
           ...incomingFiles,
         ];
 
+
         if (
           combined.length >
           MAX_FILE_COUNT
@@ -646,6 +739,7 @@ export default function ChatWidget() {
             "Maximum 5 attachments per message.",
           );
         }
+
 
         return combined.slice(
           0,
@@ -667,6 +761,7 @@ export default function ChatWidget() {
             currentIndex !== index,
         ),
     );
+
 
     setFileError(null);
   }
@@ -923,6 +1018,7 @@ export default function ChatWidget() {
                         .type ===
                       MessageSenderType
                         .Customer;
+
 
                     const isSystem =
                       message
