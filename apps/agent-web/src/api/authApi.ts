@@ -1,28 +1,37 @@
-import type { LoginRequest, LoginResponse } from "../types/auth";
+import type {
+    LoginRequest,
+    LoginResponse,
+} from "../types/auth";
 
-export async function login(request: LoginRequest): Promise<LoginResponse> {
-    const response = await fetch(
-        "/api/auth/login",
-        {
-            method: "POST",
+import {
+    apiFetch,
+    ApiError,
+} from "./apiClient";
 
-            headers: {
-                "Content-Type": "application/json",
-            },
-
-            body: JSON.stringify(request),
-        }
-    );
-
-    if (!response.ok) {
-        if (response.status === 401) {
-            throw new Error("Invalid email or password.");
-        }
-
-        throw new Error("Login failed.");
+export async function login(
+    request: LoginRequest
+): Promise<LoginResponse> {
+    try {
+        return await apiFetch<LoginResponse>(
+            "/auth/login",
+            {
+                method: "POST",
+                body: JSON.stringify(request),
+            }
+        );
     }
+    catch (error) {
+        if (
+            error instanceof ApiError &&
+            error.status === 401
+        ) {
+            throw new Error(
+                "Invalid email or password."
+            );
+        }
 
-    const data: LoginResponse = await response.json();
-
-    return data;
+        throw new Error(
+            "Login failed."
+        );
+    }
 }
