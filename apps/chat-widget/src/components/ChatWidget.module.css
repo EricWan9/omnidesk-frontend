@@ -486,7 +486,7 @@
   padding: 0;
 
   border: 0;
-  border-radius: 19px;
+  border-radius: 50%;
 
   background: #111827;
   color: #ffffff;
@@ -544,8 +544,6 @@
 
     width: 54px;
     height: 54px;
-
-    border-radius: 18px;
   }
 
   .messageBubble {

@@ -33,6 +33,7 @@
     iframe.style.width = "70px";
     iframe.style.height = "70px";
     iframe.style.border = "none";
+    iframe.style.background = "transparent";
     iframe.style.zIndex = "2147483647";
 
     window.addEventListener("message", (event) => {
