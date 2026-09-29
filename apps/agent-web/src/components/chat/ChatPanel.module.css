@@ -1,68 +1,149 @@
 .panel {
     height: 100%;
-
     display: flex;
     flex-direction: column;
-
     background: #ffffff;
 }
 
 .header {
     min-height: 76px;
     flex-shrink: 0;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     padding: 14px 24px;
-
     border-bottom: 1px solid #e6eaf0;
 }
 
 .header h2 {
     margin: 0;
-
     color: #1d2939;
-
     font-size: 16px;
     font-weight: 700;
 }
 
 .header p {
     margin: 4px 0 0;
-
     color: #98a2b3;
     font-size: 12px;
 }
 
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 5px 10px;
-
     border-radius: 999px;
-
-    background: #ecfdf3;
-    color: #027a48;
-
     font-size: 12px;
     font-weight: 600;
+}
+
+.statusOpen {
+    background: #ecfdf3;
+    color: #027a48;
+}
+
+.statusClosed {
+    background: #f2f4f7;
+    color: #344054;
+}
+
+.profileCard {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px 24px 0;
+    border-bottom: 1px solid #e6eaf0;
+    background: #f8fafc;
+}
+
+.profileGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+}
+
+.profileRow {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.profileLabel {
+    color: #667085;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.profileValue {
+    color: #1d2939;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.actionButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 16px;
+}
+
+.actionButton {
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.actionButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.actionPrimary {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.actionSecondary {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.actionTertiary {
+    border-color: #d0d5dd;
+    background: #ffffff;
+    color: #344054;
 }
 
 .messages {
     flex: 1;
     min-height: 0;
-
     overflow-y: auto;
-
     padding: 24px;
-
     background: #f8fafc;
 }
 
 .messageRowCustomer,
 .messageRowAgent {
     display: flex;
-
     margin-bottom: 14px;
 }
 
@@ -77,157 +158,178 @@
 .messageCustomer,
 .messageAgent {
     max-width: min(620px, 72%);
-
     padding: 10px 14px;
-
     border-radius: 14px;
 }
 
 .messageCustomer {
     border: 1px solid #e4e7ec;
-
     background: #ffffff;
     color: #1d2939;
-
     border-bottom-left-radius: 4px;
 }
 
 .messageAgent {
     background: #2563eb;
     color: #ffffff;
-
     border-bottom-right-radius: 4px;
 }
 
 .sender {
     margin-bottom: 4px;
-
     font-size: 11px;
     font-weight: 700;
-
     opacity: 0.75;
 }
 
 .messageContent {
     font-size: 14px;
     line-height: 1.5;
-
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
 
 .messageTime {
     margin-top: 5px;
-
     font-size: 10px;
-
     opacity: 0.65;
+}
+
+.closedNotice {
+    padding: 8px 24px;
+    border-top: 1px solid #e6eaf0;
+    background: #fff7ed;
+    color: #9a5b00;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.attachmentsBar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 20px 0;
+}
+
+.attachmentChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #344054;
+    font-size: 12px;
+}
+
+.attachmentChip button {
+    border: 0;
+    background: transparent;
+    color: #344054;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.error {
+    margin: 12px 20px 0;
+    padding: 10px 12px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #b42318;
+    font-size: 13px;
 }
 
 .composer {
     min-height: 76px;
     flex-shrink: 0;
-
     display: flex;
     align-items: center;
     gap: 10px;
-
     padding: 14px 20px;
-
     border-top: 1px solid #e6eaf0;
-
     background: #ffffff;
 }
 
 .input {
     height: 44px;
     flex: 1;
-
     padding: 0 14px;
-
     border: 1px solid #d0d5dd;
     border-radius: 9px;
-
     outline: none;
-
     background: #ffffff;
     color: #1d2939;
-
     font-size: 14px;
-
-    transition:
-        border-color 120ms ease,
-        box-shadow 120ms ease;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
 .input:focus {
     border-color: #84adff;
-
-    box-shadow:
-        0 0 0 3px
-        rgba(37, 99, 235, 0.12);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .input::placeholder {
     color: #98a2b3;
 }
 
+.attachButton,
 .sendButton {
     height: 44px;
-
-    padding: 0 20px;
-
     border: 0;
     border-radius: 9px;
-
-    background: #2563eb;
-    color: #ffffff;
-
     font-size: 14px;
     font-weight: 600;
+    transition: background 120ms ease, opacity 120ms ease;
+}
 
-    transition:
-        background 120ms ease,
-        opacity 120ms ease;
+.attachButton {
+    width: 44px;
+    background: #f2f4f7;
+    color: #344054;
+}
+
+.sendButton {
+    padding: 0 20px;
+    background: #2563eb;
+    color: #ffffff;
 }
 
 .sendButton:hover:not(:disabled) {
     background: #1d4ed8;
 }
 
-.sendButton:disabled {
+.sendButton:disabled,
+.attachButton:disabled {
     cursor: not-allowed;
     opacity: 0.45;
 }
 
 .noSelection {
     height: 100%;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
     color: #667085;
     text-align: center;
 }
 
 .noSelectionIcon {
     margin-bottom: 12px;
-
     font-size: 32px;
 }
 
 .noSelection h2 {
     margin: 0;
-
     color: #344054;
     font-size: 17px;
 }
 
 .noSelection p {
     margin: 8px 0 0;
-
     font-size: 13px;
 }
 
@@ -235,9 +337,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
     height: 100%;
-
     color: #98a2b3;
     font-size: 14px;
 }
@@ -250,23 +350,16 @@
 
 .mobileBackButton {
     display: none;
-
     width: 36px;
     height: 36px;
-
     align-items: center;
     justify-content: center;
-
     flex-shrink: 0;
-
     padding: 0;
-
     border: 1px solid #e4e7ec;
     border-radius: 8px;
-
     background: #ffffff;
     color: #344054;
-
     font-size: 20px;
     line-height: 1;
 }
@@ -280,12 +373,15 @@
         padding: 12px 16px;
     }
 
-    .messages {
-        padding: 16px;
+    .profileCard,
+    .messages,
+    .composer {
+        padding-left: 16px;
+        padding-right: 16px;
     }
 
-    .composer {
-        padding: 12px;
+    .profileGrid {
+        grid-template-columns: 1fr;
     }
 
     .messageCustomer,

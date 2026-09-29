@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { Conversation, ConversationUpdated } from '../../types/conversation';
-import { MessageSenderType, type Message } from '../../types/message';
+import type { Conversation } from '../../types/conversation';
+import type { Message } from '../../types/message';
 
 interface ConversationState {
     selectedConversationId: string | null;
@@ -34,7 +34,7 @@ const conversationSlice = createSlice({
             state.messages = action.payload;
         },
 
-       messageReceived(
+        messageReceived(
             state,
             action: PayloadAction<Message>,
         ) {
@@ -87,37 +87,34 @@ const conversationSlice = createSlice({
             }
         },
 
-        conversationUpdated(
+        upsertConversation(
             state,
-            action: PayloadAction<ConversationUpdated>,
+            action: PayloadAction<Conversation>,
         ) {
-            const update = action.payload;
+            const latestConversation = action.payload;
+            const conversationToStore = 
+                state.selectedConversationId === latestConversation.id
+                ? {
+                    ...latestConversation,
+                    unreadCount: 0,
+                }
+                : latestConversation;
 
-            const conversation =
-                state.conversations.find(
-                    c =>
-                        c.id ===
-                        update.conversationId
-                );
+            const index = state.conversations.findIndex(
+                c => c.id === latestConversation.id
+            );
 
-            if (!conversation) {
-                return;
+            if (index === -1) {
+                state.conversations.push(conversationToStore);
+            } else {
+                state.conversations[index] = conversationToStore;
             }
 
-            conversation.lastMessage =
-                update.lastMessage;
-
-            conversation.lastMessageAt =
-                update.lastMessageAt;
-
-            if (
-                update.senderType ===
-                    MessageSenderType.Customer &&
-                state.selectedConversationId !==
-                    update.conversationId
-            ) {
-                conversation.unreadCount += 1;
-            }
+            state.conversations.sort(
+                (a, b) =>
+                    Date.parse(b.updatedAt) -
+                    Date.parse(a.updatedAt)
+            );
         }
     }
 })
@@ -129,7 +126,7 @@ export const {
     setMessages,
     markConversationRead,
     incrementConversationUnread,
-    conversationUpdated,
+    upsertConversation,
     messageReceived
 } = conversationSlice.actions;
 
