@@ -12,12 +12,23 @@ import styles from "./LoginPage.module.css";
 
 function LoginPage() {
     const navigate = useNavigate();
+    const isDemoMode =
+        new URLSearchParams(window.location.search)
+            .get("demo") === "1";
 
     const [email, setEmail] =
-        useState("");
+        useState(() =>
+            isDemoMode
+                ? import.meta.env.VITE_DEMO_EMAIL ?? ""
+                : ""
+        );
 
     const [password, setPassword] =
-        useState("");
+        useState(() =>
+            isDemoMode
+                ? import.meta.env.VITE_DEMO_PASSWORD ?? ""
+                : ""
+        );
 
     const [isLoading, setIsLoading] =
         useState(false);
