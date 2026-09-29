@@ -26,12 +26,14 @@ export async function login(
             error.status === 401
         ) {
             throw new Error(
-                "Invalid email or password."
+                "Invalid email or password.",
+                { cause: error }
             );
         }
 
         throw new Error(
-            "Login failed."
+            "Login failed.",
+            { cause: error }
         );
     }
 }

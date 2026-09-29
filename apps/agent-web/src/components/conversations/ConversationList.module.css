@@ -1,30 +1,96 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 12px 0;
+}
+
+.filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid #edf1f5;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.filterSection {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filterLabel {
+    color: #667085;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.filterGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.filterButton {
+    padding: 7px 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #344054;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filterButtonActive {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.searchBox {
+    padding: 0 12px 12px;
+}
+
+.searchInput {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1d2939;
+    font-size: 13px;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #84adff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
 .list {
     width: 100%;
     min-height: 0;
-
     overflow-y: auto;
 }
 
 .item,
 .itemSelected {
     width: 100%;
-
     display: flex;
     align-items: flex-start;
     gap: 12px;
-
     padding: 14px 16px;
-
     border: 0;
     border-bottom: 1px solid #f0f2f5;
-
     background: #ffffff;
-
     text-align: left;
-
-    transition:
-        background 120ms ease,
-        border-color 120ms ease;
+    transition: background 120ms ease, border-color 120ms ease;
 }
 
 .item:hover {
@@ -40,18 +106,13 @@
 .avatar {
     width: 40px;
     height: 40px;
-
     flex-shrink: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 50%;
-
     background: #e8eef9;
     color: #315991;
-
     font-size: 13px;
     font-weight: 700;
 }
@@ -70,39 +131,31 @@
 
 .name {
     overflow: hidden;
-
     color: #1d2939;
-
     font-size: 14px;
     font-weight: 600;
-
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .time {
     flex-shrink: 0;
-
     color: #98a2b3;
     font-size: 11px;
 }
 
 .preview {
     margin-top: 5px;
-
     overflow: hidden;
-
     color: #667085;
     font-size: 13px;
     line-height: 1.35;
-
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .empty {
     padding: 32px 20px;
-
     color: #98a2b3;
     font-size: 14px;
     text-align: center;
@@ -111,18 +164,13 @@
 .unreadBadge {
     min-width: 20px;
     height: 20px;
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
     padding: 0 6px;
-
     border-radius: 999px;
-
     background: #111827;
     color: #ffffff;
-
     font-size: 11px;
     font-weight: 700;
 }
