@@ -198,6 +198,18 @@ export default function ChatWidget() {
   const [isOpen, setIsOpen] =
     useState(false);
 
+  useEffect(() => {
+    if (window.parent !== window) {
+      window.parent.postMessage(
+        {
+          type: "omnidesk-widget-state",
+          isOpen,
+        },
+        "*",
+      );
+    }
+  }, [isOpen]);
+
   const [session, setSession] =
     useState<WidgetSession | null>(
       null,

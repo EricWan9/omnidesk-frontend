@@ -30,10 +30,28 @@
     iframe.style.position = "fixed";
     iframe.style.right = "20px";
     iframe.style.bottom = "20px";
-    iframe.style.width = "380px";
-    iframe.style.height = "640px";
+    iframe.style.width = "70px";
+    iframe.style.height = "70px";
     iframe.style.border = "none";
     iframe.style.zIndex = "2147483647";
+
+    window.addEventListener("message", (event) => {
+        if (
+            event.source !== iframe.contentWindow ||
+            event.origin !== widgetOrigin ||
+            event.data?.type !== "omnidesk-widget-state" ||
+            typeof event.data.isOpen !== "boolean"
+        ) {
+            return;
+        }
+
+        iframe.style.width = event.data.isOpen
+            ? "380px"
+            : "70px";
+        iframe.style.height = event.data.isOpen
+            ? "640px"
+            : "70px";
+    });
 
     document.body.appendChild(iframe);
 })();
