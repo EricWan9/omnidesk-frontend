@@ -12,12 +12,7 @@ body,
 body {
   margin: 0;
 
-  background:
-    linear-gradient(
-      135deg,
-      #f8fafc,
-      #eef2f7
-    );
+  background: transparent;
 
   color: #111827;
 
